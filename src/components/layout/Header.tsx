@@ -34,18 +34,6 @@ export function Header() {
           >
             Enter Scores
           </Link>
-          <Link
-            href='/AdminTeamsPage'
-            className='hover:text-gray-200 transition-colors'
-          >
-            Admin
-          </Link>
-          <Link
-            href='/login'
-            className='bg-white text-[#0B3D2E] px-4 py-1 rounded hover:bg-gray-100 transition-colors'
-          >
-            Login
-          </Link>
         </nav>
       </div>
       {/* Mobile navigation */}
@@ -65,18 +53,6 @@ export function Header() {
             className='hover:text-gray-200 transition-colors'
           >
             Enter Scores
-          </Link>
-          <Link
-            href='/AdminTeamsPage'
-            className='hover:text-gray-200 transition-colors'
-          >
-            Admin
-          </Link>
-          <Link
-            href='/login'
-            className='bg-white text-[#0B3D2E] px-4 py-2 rounded text-center hover:bg-gray-100 transition-colors'
-          >
-            Login
           </Link>
         </nav>
       )}

@@ -2,8 +2,33 @@ import React, { useState } from 'react';
 
 import { TeamRow } from './TeamRow';
 
-// Mock data for the leaderboard
-const mockTeams = [
+// Mock data for the leaderboard - Assuming this structure is correct
+interface HoleScore {
+  hole: number;
+  par: number;
+  strokes: number;
+  drive: string;
+  mulligan: string | null;
+}
+
+interface Player {
+  name: string;
+  drives: number;
+  mulligansLeft: number;
+}
+
+interface Team {
+  id: number;
+  name: string;
+  grossScore: number;
+  netScore: number;
+  thru: number | 'F';
+  remainingMulligans: number;
+  players: Player[];
+  holeScores: HoleScore[];
+}
+
+const mockTeams: Team[] = [
   {
     id: 1,
     name: 'Marc & Luke',
@@ -24,132 +49,24 @@ const mockTeams = [
       },
     ],
     holeScores: [
-      {
-        hole: 1,
-        par: 4,
-        strokes: 4,
-        drive: 'M',
-        mulligan: null,
-      },
-      {
-        hole: 2,
-        par: 3,
-        strokes: 2,
-        drive: 'M',
-        mulligan: null,
-      },
-      {
-        hole: 3,
-        par: 5,
-        strokes: 5,
-        drive: 'L',
-        mulligan: null,
-      },
-      {
-        hole: 4,
-        par: 4,
-        strokes: 3,
-        drive: 'M',
-        mulligan: null,
-      },
-      {
-        hole: 5,
-        par: 4,
-        strokes: 4,
-        drive: 'L',
-        mulligan: null,
-      },
-      {
-        hole: 6,
-        par: 3,
-        strokes: 3,
-        drive: 'M',
-        mulligan: null,
-      },
-      {
-        hole: 7,
-        par: 5,
-        strokes: 6,
-        drive: 'L',
-        mulligan: 'M',
-      },
-      {
-        hole: 8,
-        par: 4,
-        strokes: 4,
-        drive: 'M',
-        mulligan: null,
-      },
-      {
-        hole: 9,
-        par: 4,
-        strokes: 3,
-        drive: 'L',
-        mulligan: null,
-      },
-      {
-        hole: 10,
-        par: 4,
-        strokes: 4,
-        drive: 'M',
-        mulligan: null,
-      },
-      {
-        hole: 11,
-        par: 3,
-        strokes: 3,
-        drive: 'L',
-        mulligan: null,
-      },
-      {
-        hole: 12,
-        par: 5,
-        strokes: 4,
-        drive: 'M',
-        mulligan: null,
-      },
-      {
-        hole: 13,
-        par: 4,
-        strokes: 5,
-        drive: 'L',
-        mulligan: 'L',
-      },
-      {
-        hole: 14,
-        par: 4,
-        strokes: 4,
-        drive: 'M',
-        mulligan: null,
-      },
-      {
-        hole: 15,
-        par: 3,
-        strokes: 2,
-        drive: 'L',
-        mulligan: null,
-      },
-      {
-        hole: 16,
-        par: 5,
-        strokes: 5,
-        drive: 'M',
-        mulligan: null,
-      },
-      {
-        hole: 17,
-        par: 4,
-        strokes: 4,
-        drive: 'L',
-        mulligan: null,
-      },
-      {
-        hole: 18,
-        par: 4,
-        strokes: 3,
-        drive: 'M',
-        mulligan: null,
-      },
+      { hole: 1, par: 4, strokes: 4, drive: 'M', mulligan: null },
+      { hole: 2, par: 3, strokes: 2, drive: 'M', mulligan: null },
+      { hole: 3, par: 5, strokes: 5, drive: 'L', mulligan: null },
+      { hole: 4, par: 4, strokes: 3, drive: 'M', mulligan: null },
+      { hole: 5, par: 4, strokes: 4, drive: 'L', mulligan: null },
+      { hole: 6, par: 3, strokes: 3, drive: 'M', mulligan: null },
+      { hole: 7, par: 5, strokes: 6, drive: 'L', mulligan: 'M' },
+      { hole: 8, par: 4, strokes: 4, drive: 'M', mulligan: null },
+      { hole: 9, par: 4, strokes: 3, drive: 'L', mulligan: null },
+      { hole: 10, par: 4, strokes: 4, drive: 'M', mulligan: null },
+      { hole: 11, par: 3, strokes: 3, drive: 'L', mulligan: null },
+      { hole: 12, par: 5, strokes: 4, drive: 'M', mulligan: null },
+      { hole: 13, par: 4, strokes: 5, drive: 'L', mulligan: 'L' },
+      { hole: 14, par: 4, strokes: 4, drive: 'M', mulligan: null },
+      { hole: 15, par: 3, strokes: 2, drive: 'L', mulligan: null },
+      { hole: 16, par: 5, strokes: 5, drive: 'M', mulligan: null },
+      { hole: 17, par: 4, strokes: 4, drive: 'L', mulligan: null },
+      { hole: 18, par: 4, strokes: 3, drive: 'M', mulligan: null },
     ],
   },
   {
@@ -172,132 +89,24 @@ const mockTeams = [
       },
     ],
     holeScores: [
-      {
-        hole: 1,
-        par: 4,
-        strokes: 4,
-        drive: 'J',
-        mulligan: null,
-      },
-      {
-        hole: 2,
-        par: 3,
-        strokes: 3,
-        drive: 'Jn',
-        mulligan: null,
-      },
-      {
-        hole: 3,
-        par: 5,
-        strokes: 4,
-        drive: 'J',
-        mulligan: 'Jn',
-      },
-      {
-        hole: 4,
-        par: 4,
-        strokes: 4,
-        drive: 'Jn',
-        mulligan: null,
-      },
-      {
-        hole: 5,
-        par: 4,
-        strokes: 5,
-        drive: 'J',
-        mulligan: null,
-      },
-      {
-        hole: 6,
-        par: 3,
-        strokes: 2,
-        drive: 'Jn',
-        mulligan: null,
-      },
-      {
-        hole: 7,
-        par: 5,
-        strokes: 5,
-        drive: 'J',
-        mulligan: null,
-      },
-      {
-        hole: 8,
-        par: 4,
-        strokes: 4,
-        drive: 'Jn',
-        mulligan: null,
-      },
-      {
-        hole: 9,
-        par: 4,
-        strokes: 3,
-        drive: 'J',
-        mulligan: null,
-      },
-      {
-        hole: 10,
-        par: 4,
-        strokes: 4,
-        drive: 'Jn',
-        mulligan: null,
-      },
-      {
-        hole: 11,
-        par: 3,
-        strokes: 3,
-        drive: 'J',
-        mulligan: null,
-      },
-      {
-        hole: 12,
-        par: 5,
-        strokes: 6,
-        drive: 'Jn',
-        mulligan: 'J',
-      },
-      {
-        hole: 13,
-        par: 4,
-        strokes: 4,
-        drive: 'J',
-        mulligan: null,
-      },
-      {
-        hole: 14,
-        par: 4,
-        strokes: 4,
-        drive: 'Jn',
-        mulligan: null,
-      },
-      {
-        hole: 15,
-        par: 3,
-        strokes: 3,
-        drive: 'J',
-        mulligan: null,
-      },
-      {
-        hole: 16,
-        par: 5,
-        strokes: 5,
-        drive: 'Jn',
-        mulligan: null,
-      },
-      {
-        hole: 17,
-        par: 4,
-        strokes: 4,
-        drive: 'J',
-        mulligan: null,
-      },
-      {
-        hole: 18,
-        par: 4,
-        strokes: 5,
-        drive: 'Jn',
-        mulligan: null,
-      },
+      { hole: 1, par: 4, strokes: 4, drive: 'J', mulligan: null },
+      { hole: 2, par: 3, strokes: 3, drive: 'Jn', mulligan: null },
+      { hole: 3, par: 5, strokes: 4, drive: 'J', mulligan: 'Jn' },
+      { hole: 4, par: 4, strokes: 4, drive: 'Jn', mulligan: null },
+      { hole: 5, par: 4, strokes: 5, drive: 'J', mulligan: null },
+      { hole: 6, par: 3, strokes: 2, drive: 'Jn', mulligan: null },
+      { hole: 7, par: 5, strokes: 5, drive: 'J', mulligan: null },
+      { hole: 8, par: 4, strokes: 4, drive: 'Jn', mulligan: null },
+      { hole: 9, par: 4, strokes: 3, drive: 'J', mulligan: null },
+      { hole: 10, par: 4, strokes: 4, drive: 'Jn', mulligan: null },
+      { hole: 11, par: 3, strokes: 3, drive: 'J', mulligan: null },
+      { hole: 12, par: 5, strokes: 6, drive: 'Jn', mulligan: 'J' },
+      { hole: 13, par: 4, strokes: 4, drive: 'J', mulligan: null },
+      { hole: 14, par: 4, strokes: 4, drive: 'Jn', mulligan: null },
+      { hole: 15, par: 3, strokes: 3, drive: 'J', mulligan: null },
+      { hole: 16, par: 5, strokes: 5, drive: 'Jn', mulligan: null },
+      { hole: 17, par: 4, strokes: 4, drive: 'J', mulligan: null },
+      { hole: 18, par: 4, strokes: 5, drive: 'Jn', mulligan: null },
     ],
   },
   {
@@ -320,146 +129,64 @@ const mockTeams = [
       },
     ],
     holeScores: [
-      {
-        hole: 1,
-        par: 4,
-        strokes: 5,
-        drive: 'B',
-        mulligan: 'A',
-      },
-      {
-        hole: 2,
-        par: 3,
-        strokes: 4,
-        drive: 'A',
-        mulligan: null,
-      },
-      {
-        hole: 3,
-        par: 5,
-        strokes: 6,
-        drive: 'B',
-        mulligan: 'B',
-      },
-      {
-        hole: 4,
-        par: 4,
-        strokes: 5,
-        drive: 'A',
-        mulligan: null,
-      },
-      {
-        hole: 5,
-        par: 4,
-        strokes: 4,
-        drive: 'B',
-        mulligan: null,
-      },
-      {
-        hole: 6,
-        par: 3,
-        strokes: 4,
-        drive: 'A',
-        mulligan: null,
-      },
-      {
-        hole: 7,
-        par: 5,
-        strokes: 5,
-        drive: 'B',
-        mulligan: null,
-      },
-      {
-        hole: 8,
-        par: 4,
-        strokes: 4,
-        drive: 'A',
-        mulligan: 'A',
-      },
-      {
-        hole: 9,
-        par: 4,
-        strokes: 5,
-        drive: 'B',
-        mulligan: null,
-      },
-      {
-        hole: 10,
-        par: 4,
-        strokes: 4,
-        drive: 'A',
-        mulligan: null,
-      },
-      {
-        hole: 11,
-        par: 3,
-        strokes: 4,
-        drive: 'B',
-        mulligan: null,
-      },
-      {
-        hole: 12,
-        par: 5,
-        strokes: 6,
-        drive: 'A',
-        mulligan: 'B',
-      },
-      {
-        hole: 13,
-        par: 4,
-        strokes: 5,
-        drive: 'B',
-        mulligan: null,
-      },
-      {
-        hole: 14,
-        par: 4,
-        strokes: 5,
-        drive: 'A',
-        mulligan: 'A',
-      },
-      {
-        hole: 15,
-        par: 3,
-        strokes: 3,
-        drive: 'B',
-        mulligan: null,
-      },
-      {
-        hole: 16,
-        par: 5,
-        strokes: 7,
-        drive: 'A',
-        mulligan: null,
-      },
+      { hole: 1, par: 4, strokes: 5, drive: 'B', mulligan: 'A' },
+      { hole: 2, par: 3, strokes: 4, drive: 'A', mulligan: null },
+      { hole: 3, par: 5, strokes: 6, drive: 'B', mulligan: 'B' },
+      { hole: 4, par: 4, strokes: 5, drive: 'A', mulligan: null },
+      { hole: 5, par: 4, strokes: 4, drive: 'B', mulligan: null },
+      { hole: 6, par: 3, strokes: 4, drive: 'A', mulligan: null },
+      { hole: 7, par: 5, strokes: 5, drive: 'B', mulligan: null },
+      { hole: 8, par: 4, strokes: 4, drive: 'A', mulligan: 'A' },
+      { hole: 9, par: 4, strokes: 5, drive: 'B', mulligan: null },
+      { hole: 10, par: 4, strokes: 4, drive: 'A', mulligan: null },
+      { hole: 11, par: 3, strokes: 4, drive: 'B', mulligan: null },
+      { hole: 12, par: 5, strokes: 6, drive: 'A', mulligan: 'B' },
+      { hole: 13, par: 4, strokes: 5, drive: 'B', mulligan: null },
+      { hole: 14, par: 4, strokes: 5, drive: 'A', mulligan: 'A' },
+      { hole: 15, par: 3, strokes: 3, drive: 'B', mulligan: null },
+      { hole: 16, par: 5, strokes: 7, drive: 'A', mulligan: null },
     ],
   },
 ];
+
 export function LeaderboardTable() {
   const [expandedTeamId, setExpandedTeamId] = useState<number | null>(null);
+
   const toggleExpand = (teamId: number) => {
     setExpandedTeamId(expandedTeamId === teamId ? null : teamId);
   };
+
+  // Ensure mockTeams is sorted by gross score initially
+  const sortedTeams = [...mockTeams].sort(
+    (a, b) => a.grossScore - b.grossScore,
+  );
+
   return (
-    <div className='bg-white rounded-lg shadow-md overflow-hidden mb-8'>
-      <div className='bg-[#0B3D2E] text-white py-3 px-4 grid grid-cols-12 text-sm font-medium'>
-        <div className='col-span-5 md:col-span-4'>Team</div>
+    <div className='bg-white rounded-lg shadow-lg overflow-hidden mb-8 border border-gray-200'>
+      {/* Header Row */}
+      <div className='bg-gray-50 text-gray-600 uppercase py-3 px-4 grid grid-cols-12 text-xs font-semibold tracking-wider border-b border-gray-200'>
+        <div className='col-span-5 md:col-span-4 pl-2'>Team</div>
         <div className='col-span-2 text-center'>Gross</div>
         <div className='col-span-2 text-center'>Net</div>
         <div className='col-span-1 text-center'>Thru</div>
-        <div className='col-span-2 md:col-span-3 text-center'>
+        <div className='col-span-2 md:col-span-3 text-center pr-2'>
           Mulligans Left
         </div>
       </div>
+      {/* Team Rows */}
       <div className='divide-y divide-gray-200'>
-        {mockTeams.map((team) => (
-          <TeamRow
-            key={team.id}
-            team={team}
-            isExpanded={expandedTeamId === team.id}
-            onToggle={() => toggleExpand(team.id)}
-          />
-        ))}
+        {sortedTeams.map(
+          (
+            team, // Use sortedTeams
+          ) => (
+            <TeamRow
+              key={team.id}
+              team={team}
+              isExpanded={expandedTeamId === team.id}
+              onToggle={() => toggleExpand(team.id)}
+            />
+          ),
+        )}
       </div>
     </div>
   );

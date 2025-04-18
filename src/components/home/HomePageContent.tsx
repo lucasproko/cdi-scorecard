@@ -6,7 +6,6 @@ const HomePageContent = () => {
       <h1 className='text-6xl font-bold text-primary'>Tournament Name</h1>
       <p className='mt-3 text-2xl text-gray-700'>Date | Location</p>
       {/* Add buttons for Join Team / View Leaderboard later */}
-      {/* Add Login/Register buttons later */}
     </div>
   );
 };
