@@ -20,5 +20,7 @@ module.exports = {
         'vercel',
       ],
     ],
+    // Disable subject case check
+    'subject-case': [0, 'never'],
   },
 };

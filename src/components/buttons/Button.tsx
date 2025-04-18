@@ -1,6 +1,5 @@
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
-import { IconType } from 'react-icons';
 
 import { cn } from '@/lib/utils';
 
@@ -12,8 +11,8 @@ type ButtonProps = {
   isDarkBg?: boolean;
   variant?: (typeof ButtonVariant)[number];
   size?: (typeof ButtonSize)[number];
-  leftIcon?: IconType | React.ElementType;
-  rightIcon?: IconType | React.ElementType;
+  leftIcon?: React.ComponentType<any>;
+  rightIcon?: React.ComponentType<any>;
   classNames?: {
     leftIcon?: string;
     rightIcon?: string;
