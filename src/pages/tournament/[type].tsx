@@ -9,6 +9,7 @@ import ScoreInputForm from '../../components/scoreInput/ScoreInputForm';
 import {
   formatRelativeToPar,
   formatThru,
+  getDetailedScoreStyling,
   getScoreColorClass,
 } from '../../lib/scoreFormatters';
 import {
@@ -524,14 +525,17 @@ export default function TournamentPage() {
                                             tournamentDetails?.course_pars[
                                               hole.toString()
                                             ];
-                                          const relativeScore = holeScore
-                                            ? holeScore.strokes - holePar
-                                            : null;
 
                                           return (
                                             <td
                                               key={hole}
-                                              className={`py-1 px-1 md:px-2 text-center border-r ${holeScore ? getScoreColorClass(relativeScore as number) : 'text-gray-400'}`}
+                                              className={clsx(
+                                                'py-1 px-1 md:px-2 text-center border-r rounded-sm',
+                                                getDetailedScoreStyling(
+                                                  holeScore?.strokes,
+                                                  holePar,
+                                                ),
+                                              )}
                                             >
                                               {holeScore
                                                 ? holeScore.strokes
@@ -822,7 +826,10 @@ export default function TournamentPage() {
                                       Score
                                     </span>
                                     <span
-                                      className={`text-2xl font-bold ${getScoreColorClass(relativeToPar)}`}
+                                      className={clsx(
+                                        'text-2xl font-bold',
+                                        getScoreColorClass(relativeToPar),
+                                      )}
                                     >
                                       {formatRelativeToPar(relativeToPar)}
                                     </span>
@@ -831,7 +838,7 @@ export default function TournamentPage() {
                                   {/* Drives Section */}
                                   <div className='flex flex-col items-center w-1/3 border-l border-gray-200 px-2'>
                                     <span className='text-xs text-gray-500 uppercase font-medium mb-1'>
-                                      Drives Used
+                                      Drives
                                     </span>
                                     <div className='flex justify-center space-x-4 text-xs text-gray-700 mb-1'>
                                       {playersToDisplay.map((p: any) => (
@@ -865,107 +872,6 @@ export default function TournamentPage() {
                               </div>
                             );
                           })()}
-
-                          {/* Keep Custom CSS for global styles (like player colors, etc.) */}
-                          <style jsx global>{`
-                            /* Hide the Status column */
-                            .score-input-wrapper th:nth-child(6),
-                            .score-input-wrapper td:nth-child(6) {
-                              display: none !important;
-                            }
-                            /* Hide original Drive Counts */
-                            .score-input-wrapper
-                              [data-testid='drive-counts-section'] {
-                              display: none !important;
-                            }
-                            /* Cell Padding */
-                            .score-input-wrapper th,
-                            .score-input-wrapper td {
-                              padding: 0.375rem 0.375rem !important;
-                            }
-                            .score-input-wrapper th:first-child,
-                            .score-input-wrapper td:first-child {
-                              padding-left: 0.5rem !important;
-                            }
-                            /* Input base style */
-                            .score-input-wrapper input[type='number'] {
-                              transition: background-color 0.2s ease;
-                              padding: 0.25rem !important;
-                              font-size: 0.875rem !important;
-                              text-align: center;
-                              border-radius: 0.375rem;
-                            }
-                            /* Score Colors */
-                            .score-input-wrapper .score-eagle {
-                              background-color: #a7f3d0 !important; /* Tailwind green-200 */
-                              color: #065f46 !important; /* Tailwind green-800 */
-                              font-weight: 700; /* Bold */
-                              border: 1px solid #065f46 !important; /* Add border */
-                            }
-                            .score-input-wrapper .score-birdie {
-                              background-color: #d1fae5 !important; /* Tailwind green-100 */
-                              color: #047857 !important; /* Tailwind green-700 */
-                              font-weight: 600;
-                            }
-                            .score-input-wrapper .score-equal-par {
-                              background-color: #f3f4f6 !important; /* Tailwind gray-100 */
-                              color: #1f2937 !important; /* Tailwind gray-800 */
-                            }
-                            .score-input-wrapper .score-bogey {
-                              background-color: #fee2e2 !important; /* Tailwind red-100 */
-                              color: #b91c1c !important; /* Tailwind red-700 */
-                              font-weight: 600;
-                            }
-                            .score-input-wrapper .score-double-bogey-plus {
-                              background-color: #fecaca !important; /* Tailwind red-200 */
-                              color: #991b1b !important; /* Tailwind red-800 */
-                              font-weight: 700; /* Bold */
-                              border: 1px solid #991b1b !important; /* Add border */
-                            }
-                            /* Select base style */
-                            .score-input-wrapper select {
-                              padding: 0.25rem 0.5rem !important;
-                              font-size: 0.875rem !important;
-                              transition: background-color 0.2s ease;
-                            }
-                            /* Player Select Colors */
-                            .score-input-wrapper .player1-selected {
-                              background-color: #dbeafe !important;
-                              color: #1e40af !important;
-                              font-weight: 600;
-                            }
-                            .score-input-wrapper .player2-selected {
-                              background-color: #fef3c7 !important;
-                              color: #92400e !important;
-                              font-weight: 600;
-                            }
-                            /* Current Score (in header) */
-                            .current-score {
-                              font-size: 1.125rem;
-                              font-weight: 600;
-                              margin-top: 0.25rem;
-                              display: flex;
-                              align-items: center;
-                              gap: 0.5rem;
-                            }
-                            .score-value {
-                              padding: 0.125rem 0.5rem;
-                              border-radius: 0.375rem;
-                              font-size: 1.125rem;
-                            }
-                            .score-value.negative {
-                              background-color: #d1fae5;
-                              color: #065f46;
-                            }
-                            .score-value.positive {
-                              background-color: #fee2e2;
-                              color: #b91c1c;
-                            }
-                            .score-value.even {
-                              background-color: #f3f4f6;
-                              color: #1f2937;
-                            }
-                          `}</style>
 
                           {/* ScoreInputForm Wrapper */}
                           <div className='score-input-wrapper overflow-x-auto'>

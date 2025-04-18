@@ -53,3 +53,35 @@ export function checkMinimumDrives(
 ): boolean {
   return driveCounts.every((player) => player.count >= minDrives);
 }
+
+/**
+ * Returns detailed Tailwind CSS classes for styling a score based on its relation to par.
+ * Provides background, text color, and font weight.
+ * @param score The actual score (strokes)
+ * @param par The par for the hole
+ * @returns Tailwind CSS class string
+ */
+export function getDetailedScoreStyling(
+  score: number | null | undefined,
+  par: number | null | undefined,
+): string {
+  if (
+    score === null ||
+    score === undefined ||
+    par === null ||
+    par === undefined ||
+    score <= 0 ||
+    par <= 0
+  ) {
+    return 'bg-white text-gray-400'; // Default for empty/invalid scores
+  }
+  const relativeScore = score - par;
+
+  if (relativeScore <= -2) return 'bg-green-700 text-white font-bold'; // Dark Green Eagle/Albatross
+  if (relativeScore === -1) return 'bg-green-100 text-green-800 font-semibold'; // Light Green Birdie
+  if (relativeScore === 0) return 'bg-gray-100 text-gray-700'; // Gray Par
+  if (relativeScore === 1) return 'bg-red-100 text-red-800'; // Light Red Bogey
+  if (relativeScore >= 2) return 'bg-red-700 text-white font-bold'; // Dark Red Dbl Bogey+
+
+  return 'bg-white text-gray-700'; // Fallback default
+}

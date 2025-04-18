@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { clsx } from 'clsx';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { checkMinimumDrives } from '../../lib/scoreFormatters';
 import { getPlayersForTeam, getTeamScores } from '../../lib/supabaseQueries';
@@ -20,28 +21,33 @@ interface HoleScore {
   mulligan_player_id: string | null;
 }
 
-// Helper function to determine score class
-const getScoreClass = (score: number, par: number): string => {
-  if (!score || !par || par === 0) return ''; // Avoid division by zero or styling without par
+// Helper function to determine score class based on Tailwind - Adjusting colors
+const getScoreTailwindClass = (score: number, par: number): string => {
+  if (!score || !par || par === 0) return 'bg-white text-gray-700'; // Default
   const relativeScore = score - par;
-  if (relativeScore <= -2) return 'score-eagle';
-  if (relativeScore === -1) return 'score-birdie';
-  if (relativeScore === 0) return 'score-equal-par';
-  if (relativeScore === 1) return 'score-bogey';
-  if (relativeScore >= 2) return 'score-double-bogey-plus';
-  return '';
+  // Use dark green for Eagle, light red for Bogey, dark red for Dbl Bogey+
+  if (relativeScore <= -2) return 'bg-green-700 text-white font-bold'; // Dark Green Eagle
+  if (relativeScore === -1) return 'bg-green-100 text-green-800 font-semibold'; // Birdie (Keep light green)
+  if (relativeScore === 0) return 'bg-gray-100 text-gray-700'; // Par
+  if (relativeScore === 1) return 'bg-red-100 text-red-800'; // Light Red Bogey
+  if (relativeScore >= 2) return 'bg-red-700 text-white font-bold'; // Dark Red Dbl Bogey+
+  return 'bg-white text-gray-700';
 };
 
-// Helper function to determine player select class
-const getPlayerSelectClass = (
+// Helper function to determine player select background class - Using Yellow/Purple
+const getPlayerSelectTailwindClass = (
   selectedPlayerId: string | null,
   playerMap: Map<string, number>,
 ): string => {
-  if (!selectedPlayerId) return '';
+  if (!selectedPlayerId) return 'bg-gray-50 text-gray-700'; // Light gray default for selects
   const playerIndex = playerMap.get(selectedPlayerId);
-  if (playerIndex === 0) return 'player1-selected';
-  if (playerIndex === 1) return 'player2-selected';
-  return '';
+  // Use Yellow for P1, Purple for P2
+  if (playerIndex === 0) return 'bg-yellow-50 text-gray-800 font-medium'; // Player 1 (Yellow)
+  if (playerIndex === 1) return 'bg-purple-100 text-gray-800 font-medium'; // Player 2 (Purple)
+  // Keep others subtle if they exist (for 4-man)
+  if (playerIndex === 2) return 'bg-blue-50 text-gray-800 font-medium';
+  if (playerIndex === 3) return 'bg-green-50 text-gray-800 font-medium';
+  return 'bg-gray-50 text-gray-700'; // Default background
 };
 
 const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
@@ -126,6 +132,27 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
       fetchData();
     }
   }, [teamId]);
+
+  // Debounce function
+  const debounce = <T extends (...args: any[]) => void>(
+    func: T,
+    wait: number,
+  ): ((...args: Parameters<T>) => void) => {
+    let timeout: NodeJS.Timeout;
+
+    return (...args: Parameters<T>) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), wait);
+    };
+  };
+
+  // Debounced save function
+  const debouncedSaveScore = useCallback(
+    debounce((score: HoleScore) => {
+      saveScore(score);
+    }, 1000), // 1000ms delay
+    [teamId, tournamentType], // Dependencies for saveScore need to be stable or included
+  );
 
   // Auto-save the score when it changes
   const saveScore = async (score: HoleScore) => {
@@ -229,292 +256,231 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
       const index = newScores.findIndex((s) => s.hole_number === holeNumber);
 
       if (index !== -1) {
+        // Get the previous state of the score being updated
+        const previousScore = prevScores[index];
+
         // Update the field
         const updatedScore = { ...newScores[index], [field]: value };
         newScores[index] = updatedScore;
 
-        // If updating drive player, recalculate drive counts
+        // If updating drive player, recalculate drive counts immediately
         if (field === 'drive_player_id') {
-          const newDriveCounts = { ...driveCounts };
-
-          // Decrement old drive player count if it exists
-          const oldDriverId = prevScores[index].drive_player_id;
-          if (oldDriverId && newDriveCounts[oldDriverId] !== undefined) {
-            newDriveCounts[oldDriverId] = Math.max(
-              0,
-              newDriveCounts[oldDriverId] - 1,
-            );
-          }
-
-          // Increment new drive player count
-          if (value && newDriveCounts[value] !== undefined) {
-            newDriveCounts[value]++;
-          }
-
-          setDriveCounts(newDriveCounts);
+          const newDriveCounts: Record<string, number> = {};
+          // Initialize counts
+          players.forEach((player) => {
+            newDriveCounts[player.id] = 0;
+          });
+          // Recalculate based on all updated scores in this batch
+          newScores.forEach((s) => {
+            if (
+              s.drive_player_id &&
+              newDriveCounts[s.drive_player_id] !== undefined
+            ) {
+              newDriveCounts[s.drive_player_id]++;
+            }
+          });
+          setDriveCounts(newDriveCounts); // Update state
         }
 
-        // Auto-save the score if it has all required fields
+        // Trigger debounced save only if strokes or drive_player_id are valid
+        // Only save if the value actually changed to avoid redundant saves
         if (
           updatedScore.strokes > 0 &&
-          updatedScore.drive_player_id !== '' &&
-          updatedScore.drive_player_id !== undefined
+          updatedScore.drive_player_id &&
+          (field !== 'mulligan_player_id' ||
+            previousScore.mulligan_player_id !== value) && // Only save if mulligan changed
+          (field !== 'strokes' || previousScore.strokes !== value) && // Only save if strokes changed
+          (field !== 'drive_player_id' ||
+            previousScore.drive_player_id !== value) // Only save if drive player changed
         ) {
-          // Use setTimeout to debounce multiple rapid changes
-          setTimeout(() => {
-            saveScore(updatedScore);
-          }, 500);
+          debouncedSaveScore(updatedScore);
         }
       }
-
       return newScores;
     });
   };
 
-  // Check drive requirements whenever they change
-  useEffect(() => {
-    // Define checkDriveRequirements INSIDE the effect
-    const checkDriveRequirements = () => {
-      const driversList = Object.entries(driveCounts).map(([id, count]) => ({
-        id,
-        name: players.find((p) => p.id === id)?.name || id,
-        count,
-      }));
+  // Check drive requirements
+  const checkDriveRequirements = () => {
+    const countsArray = players.map((player) => ({
+      id: player.id,
+      name: player.initial, // Or player.name if you prefer
+      count: driveCounts[player.id] || 0,
+    }));
+    return checkMinimumDrives(countsArray, minDrivesPerPlayer);
+  };
 
-      const drivesRequirementMet = checkMinimumDrives(
-        driversList,
-        minDrivesPerPlayer,
-      );
-
-      if (!drivesRequirementMet) {
-        setFormError(
-          `Some players have fewer than ${minDrivesPerPlayer} drives, which is the minimum requirement.`,
-        );
-      } else {
-        // Only clear the specific drive error, leave other errors
-        if (formError?.includes('drives, which is the minimum requirement')) {
-          setFormError(null);
-        }
-      }
-    };
-
-    const filledHoles = scores.filter(
-      (s) =>
-        s.strokes > 0 &&
-        s.drive_player_id !== '' &&
-        s.drive_player_id !== undefined,
-    ).length;
-
-    // Only run the check when at least 9 holes are filled
-    if (filledHoles >= 9) {
-      checkDriveRequirements();
-    }
-    // Dependencies are now based on the values USED inside the effect and checkDriveRequirements
-  }, [driveCounts, players, minDrivesPerPlayer, scores, formError]); // Removed checkDriveRequirements, added formError (used in checkDriveRequirements)
-
+  // Render loading state
   if (isLoading) {
-    return <div className='py-4 text-center'>Loading...</div>;
+    return <div className='text-center p-4'>Loading score input...</div>;
   }
 
+  // Calculate total score and relative to par
+  const totalStrokes = scores.reduce((acc, score) => acc + score.strokes, 0);
+  const totalPar = Object.values(coursePars).reduce((acc, par) => acc + par, 0);
+  const relativeToPar = totalStrokes > 0 ? totalStrokes - totalPar : 0; // Only calculate if scores exist
+
+  const driveReqsMet = checkDriveRequirements();
+
   return (
-    <div className='space-y-6'>
-      {/* Error message - Modified condition to exclude drive count warning */}
-      {(formError || submissionError) &&
-        !formError?.includes('drives, which is the minimum requirement') && (
-          <div className='bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded relative'>
-            <strong className='font-bold'>Warning:</strong>
-            <span className='block sm:inline'>
-              {formError?.includes('mulligan') ||
-              submissionError?.includes('mulligan')
-                ? 'Mulligan feature is not available or you do not have permission to use it. Your score has been saved without the mulligan.'
-                : formError || submissionError}
-            </span>
-            <button
-              className='absolute top-0 bottom-0 right-0 px-4 py-3'
-              onClick={() => {
-                setFormError(null);
-                clearError();
-              }}
-            >
-              <span className='text-2xl'>&times;</span>
-            </button>
-          </div>
-        )}
+    <div className='score-input-container p-2 sm:p-4 bg-white rounded-lg shadow-md'>
+      <h3 className='text-xl font-semibold mb-4 text-gray-800'>Enter Scores</h3>
+      {/* Display Team Info */}
+      {/* You might want to fetch and display team name here */}
 
-      {/* Player drive counts */}
-      <div
-        className='bg-gray-50 p-4 rounded-lg shadow-sm'
-        data-testid='drive-counts-section'
-      >
-        <h3 className='text-lg font-medium mb-3'>Drive Counts</h3>
-        <div className='grid grid-cols-2 gap-4'>
-          {players.map((player) => (
-            <div key={player.id} className='flex justify-between'>
-              <span>{player.name}:</span>
-              <span
-                className={
-                  driveCounts[player.id] < minDrivesPerPlayer
-                    ? 'text-red-500 font-bold'
-                    : ''
-                }
-              >
-                {driveCounts[player.id] || 0} drives
-                {driveCounts[player.id] < minDrivesPerPlayer &&
-                  ` (min: ${minDrivesPerPlayer})`}
-              </span>
-            </div>
-          ))}
+      {/* Form Error Messages */}
+      {formError && (
+        <div className='my-2 p-2 bg-red-100 text-red-700 rounded text-sm'>
+          {formError}
         </div>
-      </div>
+      )}
+      {submissionError && (
+        <div className='my-2 p-2 bg-red-100 text-red-700 rounded text-sm'>
+          Submission Error: {submissionError}
+        </div>
+      )}
 
-      <div className='space-y-8'>
-        <div className='overflow-x-auto'>
-          <table className='min-w-full divide-y divide-gray-200'>
-            <thead className='bg-gray-50'>
-              <tr>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Hole
+      {/* Score Input Table */}
+      <div className='overflow-x-auto'>
+        {/* Remove all borders, rely on spacing/backgrounds */}
+        <table className='min-w-full'>
+          {/* Table Header: Remove borders, adjust padding */}
+          <thead className='bg-gray-50'>
+            <tr>
+              <th className='pl-1 pr-1 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                Hole
+              </th>
+              <th className='px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-10'>
+                Par
+              </th>
+              <th className='px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-16'>
+                Score
+              </th>
+              <th className='px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                Drive
+              </th>
+              {tournamentType === '2-man' && (
+                <th className='pl-1 pr-1 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                  Mulley {/* Renamed Header */}
                 </th>
-                <th className='px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Par
-                </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Strokes
-                </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Drive
-                </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Mulligan
-                </th>
-                <th className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className='bg-white divide-y divide-gray-200'>
-              {scores.map((score) => {
-                // Get Par for the current hole
-                const parForHole =
-                  coursePars[score.hole_number.toString()] || '-';
-                const par = parseInt(parForHole.toString(), 10);
+              )}
+            </tr>
+          </thead>
+          {/* Table Body: Remove borders, add subtle bottom margin/padding to rows for separation? Or rely on alternating backgrounds? Let's stick to no lines for now. */}
+          <tbody className='bg-white'>
+            {scores.map((score, index) => {
+              // Add index for alternating backgrounds
+              const par = coursePars[score.hole_number] || 0;
+              const scoreInputClass = getScoreTailwindClass(score.strokes, par);
+              const driveSelectClass = getPlayerSelectTailwindClass(
+                score.drive_player_id,
+                playerMap,
+              );
+              const mulliganSelectClass = getPlayerSelectTailwindClass(
+                score.mulligan_player_id,
+                playerMap,
+              );
 
-                // Determine dynamic classes using helpers
-                const scoreClass = getScoreClass(score.strokes, par);
-                const driveClass = getPlayerSelectClass(
-                  score.drive_player_id,
-                  playerMap,
-                );
-                const mulliganClass = getPlayerSelectClass(
-                  score.mulligan_player_id,
-                  playerMap,
-                );
-
-                return (
-                  <tr key={score.hole_number}>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900'>
-                      {score.hole_number}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500'>
-                      {parForHole}
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                      <input
-                        type='number'
-                        min='1'
-                        max='15'
-                        value={score.strokes || ''}
-                        onChange={(e) =>
-                          updateScore(
-                            score.hole_number,
-                            'strokes',
-                            parseInt(e.target.value) || 0,
-                          )
-                        }
-                        className={`mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md ${scoreClass}`}
-                      />
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                      <select
-                        value={score.drive_player_id || ''}
-                        onChange={(e) =>
-                          updateScore(
-                            score.hole_number,
-                            'drive_player_id',
-                            e.target.value,
-                          )
-                        }
-                        className={`mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${driveClass}`}
-                      >
-                        <option value=''>Select player</option>
-                        {players.map((player) => (
-                          <option key={player.id} value={player.id}>
-                            {player.name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
+              return (
+                // Add subtle alternating row background instead of borders
+                <tr
+                  key={score.hole_number}
+                  className={clsx(index % 2 === 0 ? 'bg-white' : 'bg-gray-50', {
+                    'bg-yellow-50': savingHole === score.hole_number,
+                  })}
+                >
+                  {/* Cells: Remove borders, reduce horizontal padding */}
+                  <td className='pl-1 pr-1 py-2 whitespace-nowrap text-sm font-medium text-gray-900'>
+                    {score.hole_number}
+                  </td>
+                  <td className='px-1 py-2 whitespace-nowrap text-sm text-center text-gray-600 w-10'>
+                    {par || '-'}
+                  </td>
+                  <td className='px-0.5 py-1 whitespace-nowrap w-16'>
+                    {' '}
+                    {/* Minimal horizontal padding */}
+                    <input
+                      type='number'
+                      min='1'
+                      max='15'
+                      value={score.strokes > 0 ? score.strokes : ''}
+                      onChange={(e) =>
+                        updateScore(
+                          score.hole_number,
+                          'strokes',
+                          parseInt(e.target.value) || 0,
+                        )
+                      }
+                      className={clsx(
+                        'w-full p-2 text-center border border-transparent rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors duration-150',
+                        scoreInputClass, // Dynamic background/text
+                      )}
+                      placeholder='-'
+                      disabled={savingHole === score.hole_number}
+                    />
+                  </td>
+                  <td className='px-0.5 py-1 whitespace-nowrap'>
+                    {' '}
+                    {/* Minimal horizontal padding */}
+                    {/* Drive Select: More subtle border */}
+                    <select
+                      value={score.drive_player_id}
+                      onChange={(e) =>
+                        updateScore(
+                          score.hole_number,
+                          'drive_player_id',
+                          e.target.value,
+                        )
+                      }
+                      className={clsx(
+                        'w-full p-2 border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors duration-150 appearance-none',
+                        driveSelectClass, // Dynamic background
+                      )}
+                      disabled={savingHole === score.hole_number}
+                    >
+                      <option value=''>Select</option>{' '}
+                      {/* Changed default text */}
+                      {players.map((player) => (
+                        <option key={player.id} value={player.id}>
+                          {player.initial || player.name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  {tournamentType === '2-man' && (
+                    <td className='px-0.5 py-1 whitespace-nowrap'>
+                      {' '}
+                      {/* Minimal horizontal padding */}
+                      {/* Mulligan Select: More subtle border */}
                       <select
                         value={score.mulligan_player_id || ''}
                         onChange={(e) =>
                           updateScore(
                             score.hole_number,
                             'mulligan_player_id',
-                            e.target.value === '' ? null : e.target.value,
+                            e.target.value || null,
                           )
                         }
-                        className={`mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${mulliganClass}`}
+                        className={clsx(
+                          'w-full p-2 border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors duration-150 appearance-none',
+                          mulliganSelectClass, // Dynamic background
+                        )}
+                        disabled={savingHole === score.hole_number}
                       >
                         <option value=''>None</option>
                         {players.map((player) => (
                           <option key={player.id} value={player.id}>
-                            {player.name}
+                            {player.initial || player.name} {/* REMOVED Use */}
                           </option>
                         ))}
                       </select>
                     </td>
-                    <td className='px-6 py-4 whitespace-nowrap text-sm text-gray-500'>
-                      {savingHole === score.hole_number ? (
-                        <span className='text-blue-500 flex items-center'>
-                          <svg
-                            className='animate-spin -ml-1 mr-2 h-4 w-4'
-                            xmlns='http://www.w3.org/2000/svg'
-                            fill='none'
-                            viewBox='0 0 24 24'
-                          >
-                            <circle
-                              className='opacity-25'
-                              cx='12'
-                              cy='12'
-                              r='10'
-                              stroke='currentColor'
-                              strokeWidth='4'
-                            ></circle>
-                            <path
-                              className='opacity-75'
-                              fill='currentColor'
-                              d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                            ></path>
-                          </svg>
-                          Saving...
-                        </span>
-                      ) : (
-                        <>
-                          {score.strokes > 0 && score.drive_player_id ? (
-                            <span className='text-green-500'>Saved</span>
-                          ) : (
-                            <span className='text-gray-300'>Not saved</span>
-                          )}
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ export function Header() {
     <header className='bg-[#0B3D2E] text-white shadow-md'>
       <div className='container mx-auto px-4 py-4 flex justify-between items-center'>
         <Link href='/' className='font-bold text-xl'>
-          Golf Tournament
+          CDI 2025
         </Link>
         {/* Mobile menu button */}
         <button
