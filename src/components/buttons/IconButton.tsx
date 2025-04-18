@@ -1,7 +1,6 @@
-import { LucideIcon } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { IconType } from 'react-icons';
-import { ImSpinner2 } from 'react-icons/im';
 
 import { cn } from '@/lib/utils';
 
@@ -17,13 +16,19 @@ type IconButtonProps = {
   isLoading?: boolean;
   isDarkBg?: boolean;
   variant?: (typeof IconButtonVariant)[number];
-  icon?: IconType | LucideIcon;
+  icon?: IconType | React.ComponentType<any>;
   classNames?: {
     icon?: string;
   };
 } & React.ComponentPropsWithRef<'button'>;
 
-const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+const IconButton = React.forwardRef<
+  HTMLButtonElement,
+  IconButtonProps & {
+    icon: IconType | React.ComponentType<any>;
+    isLoading?: boolean;
+  }
+>(
   (
     {
       className,
@@ -35,7 +40,7 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
       classNames,
       ...rest
     },
-    ref
+    ref,
   ) => {
     const disabled = isLoading || buttonDisabled;
 
@@ -89,28 +94,26 @@ const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
           'disabled:cursor-not-allowed',
           isLoading &&
             'relative text-transparent transition-none hover:text-transparent disabled:cursor-wait',
-          className
+          className,
         )}
         {...rest}
       >
-        {isLoading && (
-          <div
-            className={cn(
-              'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
-              {
-                'text-white': ['primary', 'dark'].includes(variant),
-                'text-black': ['light'].includes(variant),
-                'text-primary-500': ['outline', 'ghost'].includes(variant),
-              }
-            )}
-          >
-            <ImSpinner2 className='animate-spin' />
-          </div>
-        )}
-        {Icon && <Icon size='1em' className={cn(classNames?.icon)} />}
+        <div className='relative flex items-center justify-center'>
+          {isLoading && (
+            <div className='absolute inset-0 flex items-center justify-center bg-inherit rounded-full'>
+              <Loader2 className='animate-spin h-[0.9em] w-[0.9em]' />
+            </div>
+          )}
+          {Icon && (
+            <Icon
+              size='1em'
+              className={cn(classNames?.icon, isLoading && 'invisible')}
+            />
+          )}
+        </div>
       </button>
     );
-  }
+  },
 );
 
 export default IconButton;
