@@ -1,7 +1,6 @@
-import { LucideIcon } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import * as React from 'react';
 import { IconType } from 'react-icons';
-import { ImSpinner2 } from 'react-icons/im';
 
 import { cn } from '@/lib/utils';
 
@@ -13,8 +12,8 @@ type ButtonProps = {
   isDarkBg?: boolean;
   variant?: (typeof ButtonVariant)[number];
   size?: (typeof ButtonSize)[number];
-  leftIcon?: IconType | LucideIcon;
-  rightIcon?: IconType | LucideIcon;
+  leftIcon?: IconType | React.ElementType;
+  rightIcon?: IconType | React.ElementType;
   classNames?: {
     leftIcon?: string;
     rightIcon?: string;
@@ -36,7 +35,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       classNames,
       ...rest
     },
-    ref
+    ref,
   ) => {
     const disabled = isLoading || buttonDisabled;
 
@@ -95,66 +94,39 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           'disabled:cursor-not-allowed',
           isLoading &&
             'relative text-transparent transition-none hover:text-transparent disabled:cursor-wait',
-          className
+          className,
         )}
         {...rest}
       >
-        {isLoading && (
-          <div
-            className={cn(
-              'absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
-              {
-                'text-white': ['primary', 'dark'].includes(variant),
-                'text-black': ['light'].includes(variant),
-                'text-primary-500': ['outline', 'ghost'].includes(variant),
-              }
-            )}
-          >
-            <ImSpinner2 className='animate-spin' />
-          </div>
-        )}
-        {LeftIcon && (
-          <div
-            className={cn([
-              size === 'base' && 'mr-1',
-              size === 'sm' && 'mr-1.5',
-            ])}
-          >
+        <div className='relative flex items-center justify-center'>
+          {isLoading && (
+            <div
+              className={cn(
+                'absolute inset-0 flex items-center justify-center',
+                'bg-inherit',
+                'rounded-md',
+              )}
+            >
+              <Loader2 className='animate-spin h-5 w-5' />
+            </div>
+          )}
+          {LeftIcon && (
             <LeftIcon
-              size='1em'
-              className={cn(
-                [
-                  size === 'base' && 'md:text-md text-md',
-                  size === 'sm' && 'md:text-md text-sm',
-                ],
-                classNames?.leftIcon
-              )}
+              className={cn('mr-2 h-4 w-4', isLoading && 'invisible')}
+              aria-hidden='true'
             />
-          </div>
-        )}
-        {children}
-        {RightIcon && (
-          <div
-            className={cn([
-              size === 'base' && 'ml-1',
-              size === 'sm' && 'ml-1.5',
-            ])}
-          >
+          )}
+          <span className={cn(isLoading && 'invisible')}>{children}</span>
+          {RightIcon && (
             <RightIcon
-              size='1em'
-              className={cn(
-                [
-                  size === 'base' && 'text-md md:text-md',
-                  size === 'sm' && 'md:text-md text-sm',
-                ],
-                classNames?.rightIcon
-              )}
+              className={cn('ml-2 h-4 w-4', isLoading && 'invisible')}
+              aria-hidden='true'
             />
-          </div>
-        )}
+          )}
+        </div>
       </button>
     );
-  }
+  },
 );
 
 export default Button;
