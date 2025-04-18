@@ -1,6 +1,5 @@
 import { Loader2 } from 'lucide-react';
 import * as React from 'react';
-import { IconType } from 'react-icons';
 
 import { cn } from '@/lib/utils';
 
@@ -16,7 +15,7 @@ type IconButtonProps = {
   isLoading?: boolean;
   isDarkBg?: boolean;
   variant?: (typeof IconButtonVariant)[number];
-  icon?: IconType | React.ComponentType<any>;
+  icon?: React.ComponentType<any>;
   classNames?: {
     icon?: string;
   };
@@ -25,7 +24,7 @@ type IconButtonProps = {
 const IconButton = React.forwardRef<
   HTMLButtonElement,
   IconButtonProps & {
-    icon: IconType | React.ComponentType<any>;
+    icon: React.ComponentType<any>;
     isLoading?: boolean;
   }
 >(
@@ -105,10 +104,7 @@ const IconButton = React.forwardRef<
             </div>
           )}
           {Icon && (
-            <Icon
-              size='1em'
-              className={cn(classNames?.icon, isLoading && 'invisible')}
-            />
+            <Icon className={cn(classNames?.icon, isLoading && 'invisible')} />
           )}
         </div>
       </button>
