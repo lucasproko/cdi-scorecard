@@ -282,6 +282,17 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
           setDriveCounts(newDriveCounts); // Update state
         }
 
+        // Immediately set saving state for select changes to provide instant feedback
+        // The actual save is still debounced
+        if (field === 'drive_player_id' || field === 'mulligan_player_id') {
+          // Only set if the value actually changed
+          if (previousScore[field] !== value) {
+            setSavingHole(holeNumber);
+            // Clear error instantly when user makes a valid selection change
+            if (field === 'drive_player_id' && value) setFormError(null);
+          }
+        }
+
         // Trigger debounced save only if strokes or drive_player_id are valid
         // Only save if the value actually changed to avoid redundant saves
         if (
@@ -386,7 +397,8 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
                 <tr
                   key={score.hole_number}
                   className={clsx(index % 2 === 0 ? 'bg-white' : 'bg-gray-50', {
-                    'bg-yellow-50': savingHole === score.hole_number,
+                    'opacity-50 pointer-events-none':
+                      savingHole === score.hole_number,
                   })}
                 >
                   {/* Cells: Remove borders, reduce horizontal padding */}
@@ -397,7 +409,6 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
                     {par || '-'}
                   </td>
                   <td className='px-0.5 py-1 whitespace-nowrap w-16'>
-                    {' '}
                     {/* Minimal horizontal padding */}
                     <input
                       type='number'
@@ -412,7 +423,7 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
                         )
                       }
                       className={clsx(
-                        'w-full p-2 text-center border border-transparent rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors duration-150',
+                        'w-full p-2 text-center border border-transparent rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-base transition-colors duration-150',
                         scoreInputClass, // Dynamic background/text
                       )}
                       placeholder='-'
@@ -433,7 +444,7 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
                         )
                       }
                       className={clsx(
-                        'w-full p-2 border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors duration-150 appearance-none',
+                        'w-full p-2 border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-base transition-colors duration-150 appearance-none',
                         driveSelectClass, // Dynamic background
                       )}
                       disabled={savingHole === score.hole_number}
@@ -462,7 +473,7 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
                           )
                         }
                         className={clsx(
-                          'w-full p-2 border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors duration-150 appearance-none',
+                          'w-full p-2 border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-base transition-colors duration-150 appearance-none',
                           mulliganSelectClass, // Dynamic background
                         )}
                         disabled={savingHole === score.hole_number}

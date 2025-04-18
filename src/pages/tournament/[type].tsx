@@ -819,15 +819,15 @@ export default function TournamentPage() {
                             // Render the component using playersToDisplay
                             return (
                               <div className='bg-white p-3 rounded-lg shadow-sm mb-4'>
-                                <div className='flex justify-around items-start text-center'>
+                                <div className='flex justify-evenly items-start text-center'>
                                   {/* Score Section */}
-                                  <div className='flex flex-col items-center w-1/3'>
-                                    <span className='text-xs text-gray-500 uppercase font-medium mb-1'>
+                                  <div className='relative flex flex-col items-center w-1/3 px-2 -translate-x-1'>
+                                    <span className='text-xs text-gray-500 uppercase font-medium mb-1 min-w-[60px] text-center'>
                                       Score
                                     </span>
                                     <span
                                       className={clsx(
-                                        'text-2xl font-bold',
+                                        'text-2xl font-bold text-center',
                                         getScoreColorClass(relativeToPar),
                                       )}
                                     >
@@ -836,8 +836,8 @@ export default function TournamentPage() {
                                   </div>
 
                                   {/* Drives Section */}
-                                  <div className='flex flex-col items-center w-1/3 border-l border-gray-200 px-2'>
-                                    <span className='text-xs text-gray-500 uppercase font-medium mb-1'>
+                                  <div className='flex flex-col items-center w-1/3 px-2 border-l border-gray-200'>
+                                    <span className='text-xs text-gray-500 uppercase font-medium mb-1 min-w-[60px] text-center'>
                                       Drives
                                     </span>
                                     <div className='flex justify-center space-x-4 text-xs text-gray-700 mb-1'>
@@ -853,8 +853,8 @@ export default function TournamentPage() {
                                   </div>
 
                                   {/* Mulligans Section */}
-                                  <div className='flex flex-col items-center w-1/3 border-l border-gray-200 px-2'>
-                                    <span className='text-xs text-gray-500 uppercase font-medium mb-1'>
+                                  <div className='flex flex-col items-center w-1/3 px-2 border-l border-gray-200'>
+                                    <span className='text-xs text-gray-500 uppercase font-medium mb-1 min-w-[60px] text-center'>
                                       Mulleys
                                     </span>
                                     <div className='flex justify-center space-x-4 text-xs text-gray-700 mb-1'>
