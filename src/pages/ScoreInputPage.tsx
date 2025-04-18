@@ -1,18 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import Layout from '../components/layout/Layout';
-import {
-  ScoreInputForm,
-  SubmittedScoreData,
-} from '../components/scoring/ScoreInputForm';
+import ScoreInputForm from '../components/scoreInput/ScoreInputForm';
+import { TournamentType } from '../types/supabase';
 
 // console.log('Imported ScoreInputForm:', ScoreInputForm); // REMOVE
 
 export function ScoreInputPage() {
   // console.log('Rendering ScoreInputPage'); // REMOVE
-
-  // State to control display of success message after submission
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Mock course data - in a real app this would come from an API
   const courseData = {
@@ -26,32 +21,36 @@ export function ScoreInputPage() {
       }),
     ),
   };
+
+  // Create coursePars from courseData
+  const coursePars = courseData.holes.reduce(
+    (acc, hole) => {
+      acc[hole.number.toString()] = hole.par;
+      return acc;
+    },
+    {} as { [key: string]: number },
+  );
+
   // Mock team data - in a real app this would come from an API or user selection
   const teamData = {
-    id: 1,
+    id: '1', // Assuming teamId is a string now based on ScoreInputForm props
     name: 'Your Team',
     players: [
-      {
-        id: 1,
-        name: 'Player 1',
-        mulligansLeft: 3,
-      },
-      {
-        id: 2,
-        name: 'Player 2',
-        mulligansLeft: 3,
-      },
+      { id: 1, name: 'Player 1', mulligansLeft: 3 },
+      { id: 2, name: 'Player 2', mulligansLeft: 3 },
     ],
   };
-  const handleSubmitScores = (_scoreData: SubmittedScoreData) => {
-    // console.log('Simulating score submission:', _scoreData); // Keep commented out or remove
-    // In a real app, this would send data to an API
-    setIsSubmitted(true);
-    // Redirect to leaderboard after a short delay
-    setTimeout(() => {
-      window.location.href = '/LeaderboardPage';
-    }, 2000);
-  };
+
+  // Create playerMap from teamData
+  const playerMap = new Map<string, number>();
+  teamData.players.forEach((player, index) => {
+    playerMap.set(player.id.toString(), index);
+  });
+
+  // Mock tournament type (using a valid value from the defined type)
+  const tournamentType: TournamentType = '2-man';
+  const minDrivesPerPlayer = 5;
+
   return (
     <Layout>
       <div className='w-full bg-[#F3F4F6] py-8 md:py-12'>
@@ -63,22 +62,13 @@ export function ScoreInputPage() {
             Enter your team's scores for each hole. Remember to select which
             player's drive was used and mark any mulligans.
           </p>
-          {isSubmitted ? (
-            <div className='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative max-w-3xl mx-auto'>
-              <strong className='font-bold'>Success!</strong>
-              <span className='block sm:inline'>
-                {' '}
-                Your scores have been submitted.
-              </span>
-              <p className='mt-2'>Redirecting to leaderboard...</p>
-            </div>
-          ) : (
-            <ScoreInputForm
-              courseData={courseData}
-              teamData={teamData}
-              onSubmit={handleSubmitScores}
-            />
-          )}
+          <ScoreInputForm
+            teamId={teamData.id}
+            tournamentType={tournamentType}
+            minDrivesPerPlayer={minDrivesPerPlayer}
+            coursePars={coursePars}
+            playerMap={playerMap}
+          />
         </div>
       </div>
     </Layout>
