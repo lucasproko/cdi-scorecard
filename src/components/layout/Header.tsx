@@ -22,18 +22,6 @@ export function Header() {
           <Link href='/' className='hover:text-gray-200 transition-colors'>
             Home
           </Link>
-          <Link
-            href='/LeaderboardPage'
-            className='hover:text-gray-200 transition-colors'
-          >
-            Leaderboard
-          </Link>
-          <Link
-            href='/ScoreInputPage'
-            className='hover:text-gray-200 transition-colors'
-          >
-            Enter Scores
-          </Link>
         </nav>
       </div>
       {/* Mobile navigation */}
@@ -41,18 +29,6 @@ export function Header() {
         <nav className='md:hidden px-4 py-2 pb-4 flex flex-col space-y-3 bg-[#0B3D2E] border-t border-[#0a3528]'>
           <Link href='/' className='hover:text-gray-200 transition-colors'>
             Home
-          </Link>
-          <Link
-            href='/LeaderboardPage'
-            className='hover:text-gray-200 transition-colors'
-          >
-            Leaderboard
-          </Link>
-          <Link
-            href='/ScoreInputPage'
-            className='hover:text-gray-200 transition-colors'
-          >
-            Enter Scores
           </Link>
         </nav>
       )}
