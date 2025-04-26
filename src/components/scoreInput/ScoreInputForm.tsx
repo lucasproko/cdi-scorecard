@@ -370,7 +370,7 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
               <th className='px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                 Drive
               </th>
-              {tournamentType === '2-man' && (
+              {(tournamentType === '2-man' || tournamentType === '4-man') && (
                 <th className='pl-1 pr-1 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                   Mulley {/* Renamed Header */}
                 </th>
@@ -458,7 +458,8 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
                       ))}
                     </select>
                   </td>
-                  {tournamentType === '2-man' && (
+                  {(tournamentType === '2-man' ||
+                    tournamentType === '4-man') && (
                     <td className='px-0.5 py-1 whitespace-nowrap'>
                       {' '}
                       {/* Minimal horizontal padding */}

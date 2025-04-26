@@ -17,9 +17,9 @@ export function HomePage() {
           >
             <div className='p-8 md:p-10 flex flex-col items-center justify-center text-center h-full'>
               <h2 className='text-3xl font-bold text-[#0B3D2E] mb-3'>
-                2-Man Scramble
+                Saturday
               </h2>
-              <p className='text-gray-600'>Teams of two players</p>
+              <p className='text-gray-600'>2-man scramble</p>
             </div>
           </Link>
 
@@ -28,10 +28,8 @@ export function HomePage() {
             className='flex-1 bg-white hover:bg-gray-50 border-2 border-[#0B3D2E] rounded-lg shadow-lg transition-all hover:shadow-xl transform hover:-translate-y-1'
           >
             <div className='p-8 md:p-10 flex flex-col items-center justify-center text-center h-full'>
-              <h2 className='text-3xl font-bold text-[#0B3D2E] mb-3'>
-                4-Man Scramble
-              </h2>
-              <p className='text-gray-600'>Teams of four players</p>
+              <h2 className='text-3xl font-bold text-[#0B3D2E] mb-3'>Sunday</h2>
+              <p className='text-gray-600'>4-man scramble</p>
             </div>
           </Link>
         </div>
