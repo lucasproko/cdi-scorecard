@@ -1,0 +1,59 @@
+## General Guidelines
+
+- Use functional components with hooks instead of class components.
+- Prefer TypeScript for type safety; use .tsx files where applicable.
+- Maintain consistency with the project's existing code style, especially for Tailwind CSS classes.
+
+## Project Structure
+
+- Place page components in the pages directory (e.g., pages/index.tsx, pages/about.tsx).
+- Store reusable UI components in the components directory (e.g., components/Button.tsx).
+- Use pages/api for API routes when needed.
+
+## Tailwind CSS
+
+- Prioritize Tailwind utility classes over custom CSS.
+- Apply responsive prefixes (e.g., md:, lg:) for media queries.
+- Extend or customize styles via tailwind.config.js.
+- Verify that all class names are valid and exist in the Tailwind configuration.
+
+## Component Integration
+
+- For imported or generated components:
+    - Place them in the correct directory (components or pages).
+    - Define prop types or default props as needed.
+    - Ensure proper export/import syntax.
+- Use relative paths for imports unless aliases are set up in jsconfig.json or tsconfig.json.
+
+## React Best Practices
+
+- Include a unique key prop for lists.
+- Manage state with useState and side effects with useEffect.
+- Avoid direct DOM manipulation; rely on React's state and props.
+- Optimize performance with React.memo or useCallback where applicable.
+
+## Next.js Specifics
+
+- Fetch data using getStaticProps or getServerSideProps for pages.
+- Ensure public routes are accessible without authentication when required.
+- Utilize Next.js features like image optimization and font loading.
+
+## Error Handling
+
+- Address common React issues:
+    - Missing keys in lists.
+    - Conditional or looped hook calls.
+    - Unhandled promises in useEffect.
+- Enforce code quality with ESLint and Prettier.
+- Check for console warnings or errors after changes.
+
+## Performance Considerations
+
+- Optimize Tailwind CSS by ensuring proper purging to reduce bundle size.
+- Prevent unnecessary re-renders with React.memo or useCallback.
+- For large datasets, consider virtualization or lazy loading.
+
+## Additional Notes
+
+- Refer to official React, Next.js, and Tailwind CSS documentation when needed.
+- Keep code modular and reusable for scalability.image.png

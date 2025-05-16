@@ -222,9 +222,9 @@ export default function TournamentPage() {
   // Get minimum required drives based on tournament type
   const getMinDrivesPerPlayer = () => {
     // Default to 5 drives for 2-man scramble
-    // 3 drives for 4-man scramble
+    // 2 drives for 4-man scramble (changed from 3 or 5)
     if (type === '4-man') {
-      return 3;
+      return 2;
     }
     return 5;
   };
@@ -373,10 +373,12 @@ export default function TournamentPage() {
                         <span className='md:hidden'>Thru</span>
                         <span className='hidden md:inline'>Thru</span>
                       </div>
-                      <div className='py-2 px-2 md:px-3 text-center w-[20%] md:w-1/4'>
-                        <span className='md:hidden'>M</span>
-                        <span className='hidden md:inline'>Mulleys</span>
-                      </div>
+                      {type !== '4-man' && (
+                        <div className='py-2 px-2 md:px-3 text-center w-[20%] md:w-1/4'>
+                          <span className='md:hidden'>M</span>
+                          <span className='hidden md:inline'>Mulleys</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Team Rows - Container for horizontal scroll if needed */}
@@ -413,9 +415,11 @@ export default function TournamentPage() {
                                 {formatThru(item.holesCompleted)}
                               </div>
                               {/* Mulleys - Adjusted width */}
-                              <div className='w-[20%] md:w-1/4 text-center text-xs md:text-sm px-2 text-gray-600'>
-                                {item.totalRemainingMulligans}
-                              </div>
+                              {type !== '4-man' && (
+                                <div className='w-[20%] md:w-1/4 text-center text-xs md:text-sm px-2 text-gray-600'>
+                                  {item.totalRemainingMulligans}
+                                </div>
+                              )}
                             </div>
 
                             {/* Expanded Detail View - Reduce padding */}
@@ -449,10 +453,12 @@ export default function TournamentPage() {
                                             >
                                               {dc.count} Drives
                                             </span>
-                                            <span className='ml-2 text-blue-600'>
-                                              {mulliganInfo?.remaining || 0}{' '}
-                                              Mulleys
-                                            </span>
+                                            {type !== '4-man' && (
+                                              <span className='ml-2 text-blue-600'>
+                                                {mulliganInfo?.remaining || 0}{' '}
+                                                Mulleys
+                                              </span>
+                                            )}
                                           </span>
                                         </div>
                                       );
@@ -576,34 +582,37 @@ export default function TournamentPage() {
                                       </tr>
 
                                       {/* Mulligan Row */}
-                                      <tr>
-                                        <td className='py-1 px-1 md:px-2 font-medium text-gray-900 border-r'>
-                                          Mulligan
-                                        </td>
-                                        {Array.from(
-                                          { length: 18 },
-                                          (_, i) => i + 1,
-                                        ).map((hole) => {
-                                          const holeScore = item.scores.find(
-                                            (s: any) => s.hole_number === hole,
-                                          );
-                                          const mulliganInitial = holeScore
-                                            ?.mulligan_player?.name
-                                            ? holeScore.mulligan_player.name.charAt(
-                                                0,
-                                              )
-                                            : '–';
+                                      {type !== '4-man' && (
+                                        <tr>
+                                          <td className='py-1 px-1 md:px-2 font-medium text-gray-900 border-r'>
+                                            Mulligan
+                                          </td>
+                                          {Array.from(
+                                            { length: 18 },
+                                            (_, i) => i + 1,
+                                          ).map((hole) => {
+                                            const holeScore = item.scores.find(
+                                              (s: any) =>
+                                                s.hole_number === hole,
+                                            );
+                                            const mulliganInitial = holeScore
+                                              ?.mulligan_player?.name
+                                              ? holeScore.mulligan_player.name.charAt(
+                                                  0,
+                                                )
+                                              : '–';
 
-                                          return (
-                                            <td
-                                              key={hole}
-                                              className={`py-1 px-1 md:px-2 text-center border-r ${holeScore?.mulligan_player ? 'text-orange-500 font-medium' : 'text-gray-400'}`}
-                                            >
-                                              {mulliganInitial}
-                                            </td>
-                                          );
-                                        })}
-                                      </tr>
+                                            return (
+                                              <td
+                                                key={hole}
+                                                className={`py-1 px-1 md:px-2 text-center border-r ${holeScore?.mulligan_player ? 'text-orange-500 font-medium' : 'text-gray-400'}`}
+                                              >
+                                                {mulliganInitial}
+                                              </td>
+                                            );
+                                          })}
+                                        </tr>
+                                      )}
                                     </tbody>
                                   </table>
                                 </div>
@@ -853,21 +862,23 @@ export default function TournamentPage() {
                                   </div>
 
                                   {/* Mulligans Section */}
-                                  <div className='flex flex-col items-center w-1/3 px-2 border-l border-gray-200'>
-                                    <span className='text-xs text-gray-500 uppercase font-medium mb-1 min-w-[60px] text-center'>
-                                      Mulleys
-                                    </span>
-                                    <div className='flex justify-center space-x-4 text-xs text-gray-700 mb-1'>
-                                      {playersToDisplay.map((p: any) => (
-                                        <span key={p.id}>{p.initials}</span>
-                                      ))}
+                                  {type !== '4-man' && (
+                                    <div className='flex flex-col items-center w-1/3 px-2 border-l border-gray-200'>
+                                      <span className='text-xs text-gray-500 uppercase font-medium mb-1 min-w-[60px] text-center'>
+                                        Mulleys
+                                      </span>
+                                      <div className='flex justify-center space-x-4 text-xs text-gray-700 mb-1'>
+                                        {playersToDisplay.map((p: any) => (
+                                          <span key={p.id}>{p.initials}</span>
+                                        ))}
+                                      </div>
+                                      <div className='flex justify-center space-x-4 text-lg font-semibold'>
+                                        {playersToDisplay.map((p: any) => (
+                                          <span key={p.id}>{p.mulligans}</span>
+                                        ))}
+                                      </div>
                                     </div>
-                                    <div className='flex justify-center space-x-4 text-lg font-semibold'>
-                                      {playersToDisplay.map((p: any) => (
-                                        <span key={p.id}>{p.mulligans}</span>
-                                      ))}
-                                    </div>
-                                  </div>
+                                  )}
                                 </div>
                               </div>
                             );

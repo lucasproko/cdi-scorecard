@@ -370,11 +370,12 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
               <th className='px-1 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
                 Drive
               </th>
-              {(tournamentType === '2-man' || tournamentType === '4-man') && (
-                <th className='pl-1 pr-1 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
-                  Mulley {/* Renamed Header */}
-                </th>
-              )}
+              {tournamentType !== '4-man' &&
+                (tournamentType === '2-man' || tournamentType === '4-man') && (
+                  <th className='pl-1 pr-1 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>
+                    Mulley {/* Renamed Header */}
+                  </th>
+                )}
             </tr>
           </thead>
           {/* Table Body: Remove borders, add subtle bottom margin/padding to rows for separation? Or rely on alternating backgrounds? Let's stick to no lines for now. */}
@@ -458,36 +459,38 @@ const ScoreInputForm: React.FC<ScoreInputFormProps> = ({
                       ))}
                     </select>
                   </td>
-                  {(tournamentType === '2-man' ||
-                    tournamentType === '4-man') && (
-                    <td className='px-0.5 py-1 whitespace-nowrap'>
-                      {' '}
-                      {/* Minimal horizontal padding */}
-                      {/* Mulligan Select: More subtle border */}
-                      <select
-                        value={score.mulligan_player_id || ''}
-                        onChange={(e) =>
-                          updateScore(
-                            score.hole_number,
-                            'mulligan_player_id',
-                            e.target.value || null,
-                          )
-                        }
-                        className={clsx(
-                          'w-full p-2 border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-base transition-colors duration-150 appearance-none',
-                          mulliganSelectClass, // Dynamic background
-                        )}
-                        disabled={savingHole === score.hole_number}
-                      >
-                        <option value=''>None</option>
-                        {players.map((player) => (
-                          <option key={player.id} value={player.id}>
-                            {player.initial || player.name} {/* REMOVED Use */}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                  )}
+                  {tournamentType !== '4-man' &&
+                    (tournamentType === '2-man' ||
+                      tournamentType === '4-man') && (
+                      <td className='px-0.5 py-1 whitespace-nowrap'>
+                        {' '}
+                        {/* Minimal horizontal padding */}
+                        {/* Mulligan Select: More subtle border */}
+                        <select
+                          value={score.mulligan_player_id || ''}
+                          onChange={(e) =>
+                            updateScore(
+                              score.hole_number,
+                              'mulligan_player_id',
+                              e.target.value || null,
+                            )
+                          }
+                          className={clsx(
+                            'w-full p-2 border border-gray-200 rounded focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-base transition-colors duration-150 appearance-none',
+                            mulliganSelectClass, // Dynamic background
+                          )}
+                          disabled={savingHole === score.hole_number}
+                        >
+                          <option value=''>None</option>
+                          {players.map((player) => (
+                            <option key={player.id} value={player.id}>
+                              {player.initial || player.name}{' '}
+                              {/* REMOVED Use */}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    )}
                 </tr>
               );
             })}
