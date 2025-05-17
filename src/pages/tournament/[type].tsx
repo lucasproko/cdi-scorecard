@@ -357,19 +357,42 @@ export default function TournamentPage() {
                     {/* Sticky Header Row - Always visible, abbreviated on mobile. Adjusted top offset. */}
                     <div className='sticky top-[0px] z-10 flex bg-gray-200 text-gray-700 uppercase text-xs leading-normal border-b border-gray-300'>
                       {/* Use spans with hidden/md:inline for title switching */}
-                      <div className='py-2 px-2 md:px-3 text-left w-[35%] md:w-1/4'>
+                      <div
+                        className={clsx(
+                          'py-2 px-2 md:px-3 text-left',
+                          type === '4-man'
+                            ? 'w-[40%] md:w-1/3'
+                            : 'w-[35%] md:w-1/4',
+                        )}
+                      >
                         <span className='md:hidden'>T</span>
                         <span className='hidden md:inline'>Team</span>
                       </div>
-                      <div className='py-2 px-1 md:px-3 text-center w-[15%] md:w-1/4'>
+                      <div
+                        className={clsx(
+                          'py-2 px-1 md:px-3 text-center',
+                          type === '4-man'
+                            ? 'w-[30%] md:w-1/3'
+                            : 'w-[15%] md:w-1/4',
+                        )}
+                      >
                         <span className='md:hidden'>G</span>
                         <span className='hidden md:inline'>Gross</span>
                       </div>
-                      <div className='py-2 px-1 md:px-3 text-center w-[15%] md:w-1/4'>
-                        <span className='md:hidden'>N</span>
-                        <span className='hidden md:inline'>Net</span>
-                      </div>
-                      <div className='py-2 px-1 md:px-3 text-center w-[15%] md:w-1/4'>
+                      {type !== '4-man' && (
+                        <div className='py-2 px-1 md:px-3 text-center w-[15%] md:w-1/4'>
+                          <span className='md:hidden'>N</span>
+                          <span className='hidden md:inline'>Net</span>
+                        </div>
+                      )}
+                      <div
+                        className={clsx(
+                          'py-2 px-1 md:px-3 text-center',
+                          type === '4-man'
+                            ? 'w-[30%] md:w-1/3'
+                            : 'w-[15%] md:w-1/4',
+                        )}
+                      >
                         <span className='md:hidden'>Thru</span>
                         <span className='hidden md:inline'>Thru</span>
                       </div>
@@ -392,7 +415,14 @@ export default function TournamentPage() {
                               onClick={() => toggleTeamExpansion(item.team.id)}
                             >
                               {/* Team Name - Adjusted width */}
-                              <div className='w-[35%] md:w-1/4 text-xs md:text-sm font-medium text-gray-800 flex items-center truncate pr-1'>
+                              <div
+                                className={clsx(
+                                  'text-xs md:text-sm font-medium text-gray-800 flex items-center truncate pr-1',
+                                  type === '4-man'
+                                    ? 'w-[40%] md:w-1/3'
+                                    : 'w-[35%] md:w-1/4',
+                                )}
+                              >
                                 <span
                                   className={`inline-block mr-1 transition-transform duration-200 ${expandedTeamId === item.team.id ? 'transform rotate-90' : ''}`}
                                 >
@@ -402,16 +432,31 @@ export default function TournamentPage() {
                               </div>
                               {/* Scores & Thru - Adjusted widths & padding */}
                               <div
-                                className={`w-[15%] md:w-1/4 text-center text-xs md:text-sm font-semibold px-1 ${getScoreColorClass(item.relativeToPar)}`}
+                                className={clsx(
+                                  'text-center text-xs md:text-sm font-semibold px-1',
+                                  getScoreColorClass(item.relativeToPar),
+                                  type === '4-man'
+                                    ? 'w-[30%] md:w-1/3'
+                                    : 'w-[15%] md:w-1/4',
+                                )}
                               >
                                 {formatRelativeToPar(item.relativeToPar)}
                               </div>
+                              {type !== '4-man' && (
+                                <div
+                                  className={`w-[15%] md:w-1/4 text-center text-xs md:text-sm px-1 ${getScoreColorClass(item.netRelativeToPar)}`}
+                                >
+                                  {formatRelativeToPar(item.netRelativeToPar)}
+                                </div>
+                              )}
                               <div
-                                className={`w-[15%] md:w-1/4 text-center text-xs md:text-sm px-1 ${getScoreColorClass(item.netRelativeToPar)}`}
+                                className={clsx(
+                                  'text-center text-xs md:text-sm px-1 text-gray-600',
+                                  type === '4-man'
+                                    ? 'w-[30%] md:w-1/3'
+                                    : 'w-[15%] md:w-1/4',
+                                )}
                               >
-                                {formatRelativeToPar(item.netRelativeToPar)}
-                              </div>
-                              <div className='w-[15%] md:w-1/4 text-center text-xs md:text-sm px-1 text-gray-600'>
                                 {formatThru(item.holesCompleted)}
                               </div>
                               {/* Mulleys - Adjusted width */}
@@ -845,7 +890,12 @@ export default function TournamentPage() {
                                   </div>
 
                                   {/* Drives Section */}
-                                  <div className='flex flex-col items-center w-1/3 px-2 border-l border-gray-200'>
+                                  <div
+                                    className={clsx(
+                                      'flex flex-col items-center px-2 border-l border-gray-200',
+                                      type === '4-man' ? 'w-2/3' : 'w-1/3',
+                                    )}
+                                  >
                                     <span className='text-xs text-gray-500 uppercase font-medium mb-1 min-w-[60px] text-center'>
                                       Drives
                                     </span>
